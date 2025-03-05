@@ -1,0 +1,11 @@
+max_workers: 16                  # Max number of worker threads for handling requests
+wait_before_shutdown: 60         # Time (in seconds) to wait before shutting down the server gracefully
+grpc_options:
+  - [grpc.max_send_message_length, 1073741824]  # Max send message size (1 GB) for gRPC communication
+  - [grpc.max_receive_message_length, 1073741824]  # Max receive message size (1 GB) for gRPC communication
+  - [grpc.keepalive_time_ms, 60000]              # Ping the client every 60 seconds
+  - [grpc.keepalive_timeout_ms, 30000]           # Wait 30 seconds for a ping response
+  - [grpc.keepalive_permit_without_calls, True]  # Allow keepalives even with no active calls
+  - [grpc.http2.max_pings_without_data, 0]       # Allow unlimited pings without data
+  - [grpc.http2.min_time_between_pings_ms, 60000] # Minimum 60 seconds between pings
+  - [grpc.http2.max_ping_strikes, 5]             # Termination due to 5 missed pings

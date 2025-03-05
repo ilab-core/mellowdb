@@ -1,0 +1,8 @@
+google-cloud-secret-manager==2.22.0
+google-cloud-storage>=2.18.2
+google-api-core>=2.18.2
+grpcio==1.68.1
+grpcio-status==1.68.1
+grpcio-tools==1.68.1
+pyyaml
+setuptools>=75.6.0

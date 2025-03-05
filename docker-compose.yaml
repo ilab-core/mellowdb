@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  mellow-db:
+     build:
+       context: .
+     ports:
+       - "${MELLOW_PORT}:${MELLOW_PORT}"
+     volumes:
+       - ~/mellow-db-volume/${MELLOW_DATA_DIR}:/mellow-db/${MELLOW_DATA_DIR}
+     env_file:
+       - .env
+     restart: always

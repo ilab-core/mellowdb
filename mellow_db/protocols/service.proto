@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+service MellowService {
+    rpc connect (ConnectRequest) returns (ConnectResponse);
+    rpc disconnect (DisconnectRequest) returns (DisconnectResponse);
+    rpc use_collection (UseCollectionRequest) returns (UseCollectionResponse);
+    rpc create_collection (CreateCollectionRequest) returns (CreateCollectionResponse);
+    rpc delete_collection (DeleteCollectionRequest) returns (DeleteCollectionResponse);
+    rpc get_collection_item_count (GetCollectionItemCountRequest) returns (GetCollectionItemCountResponse);
+    rpc get_collection_info (GetCollectionInfoRequest) returns (GetCollectionInfoResponse);
+    rpc add (AddRequest) returns (AddResponse);
+    rpc get (GetRequest) returns (GetResponse);
+    rpc search (SearchRequest) returns (SearchResponse);
+    rpc eval (EvalRequest) returns (EvalResponse);
+    rpc back_up (BackUpRequest) returns (BackUpResponse);
+    rpc back_up_to_gcs (BackUpToGcsRequest) returns (BackUpToGcsResponse);
+    rpc load_from_path (LoadFromPathRequest) returns (LoadFromPathResponse);
+    rpc load_from_gcs (LoadFromGcsRequest) returns (LoadFromGcsResponse);
+}
+
+// FUNCTION SPECIFIC
+
+// CONNECT
+
+message ConnectRequest { }
+
+message ConnectResponse {
+    string client_id = 1;  // Unique id of the connection. This should be passed in other requests
+    string message = 2;
+}
+
+// DISCONNECT
+
+message DisconnectRequest {
+    string client_id = 1;
+}
+
+message DisconnectResponse {
+    string message = 1;
+}
+
+// CREATE COLLECTION
+
+message CreateCollectionRequest {
+    string collection_name = 1;
+    bool create_collection = 2;
+    repeated CollectionSchema collection_schema = 3;
+    KeyedFlexItemList index_config = 4;
+    string client_id = 5;
+}
+
+message CreateCollectionResponse {
+    string message = 1;
+}
+
+// USE COLLECTION
+
+message UseCollectionRequest {
+    string collection_name = 1;
+    string client_id = 2;
+}
+
+message UseCollectionResponse {
+    string message = 1;
+}
+
+// DELETE COLLECTION
+
+message DeleteCollectionRequest {
+    string collection_name = 1;
+    string client_id = 2;
+}
+
+message DeleteCollectionResponse {
+    string message = 1;
+}
+
+// GET COLLECTION ITEM COUNT
+
+message GetCollectionItemCountRequest {
+    string client_id = 1;
+}
+
+message GetCollectionItemCountResponse {
+    int32 item_count = 1;
+}
+
+// GET COLLECTION INFO
+
+message GetCollectionInfoRequest {
+    string client_id = 1;
+}
+
+message GetCollectionInfoResponse {
+    repeated string primary_keys = 1;
+    repeated KeyedFlexItemList meta_columns = 2;
+    int32 item_count = 3;
+    uint64 size_in_bytes = 4;
+    string faiss_index_type = 5;
+    string faiss_index_metric = 6;
+    int32 embedding_dim = 7;
+}
+
+// ADD
+
+message AddRequest {
+    repeated KeyedEmbedding embedding = 1; // List of embeddings to be added
+    repeated KeyedKeyedFlexList metadata = 2;  // Map of metadata keyed by string keys
+    bool upsert = 3;
+    string client_id = 4;
+}
+
+message AddResponse {
+    int32 item_count = 1;     // Updated count of the collection
+}
+
+// GET
+
+message GetRequest {
+    repeated KeyedKeyedFlexList where = 1;
+    repeated string projection = 2;
+    int32 limit = 3;
+    string client_id = 4;
+}
+
+message GetResponse {
+    repeated FlexItemList results = 1;
+}
+
+// SEARCH
+
+message SearchRequest {
+    repeated string query_keys = 1;
+    repeated KeyedKeyedFlexList where = 2;
+    repeated string projection = 3;
+    optional int32 n_results = 4;
+    optional double threshold = 5;
+    bool not_exists_ok = 6;
+    string client_id = 7;
+}
+
+message SearchResponse {
+    repeated FlexItemListList results = 1;
+}
+
+// EVAL
+
+message EvalRequest {
+    int32 subset_size = 1;
+    int32 test_size = 2;
+    int32 k = 3;
+    double tolerance = 4;
+    string client_id = 5;
+}
+
+message EvalResponse {
+    double avg_mellow_time = 1;
+    double avg_cosine_time = 2;
+    double avg_precision = 3;
+    double avg_recall = 4;
+    double sum_diffs = 5;
+    double avg_diffs = 6;
+}
+
+// BACK UP
+
+message BackUpRequest {
+    string client_id = 1;
+    string backup_dir = 2;
+}
+
+message BackUpResponse {
+    string message = 1;
+    string backup_full_path = 2;
+}
+
+// BACK UP TO GCS
+
+message BackUpToGcsRequest {
+    string client_id = 1;
+    string creds = 2;
+    string bucket = 3;
+    string backup_dir = 4;
+}
+
+message BackUpToGcsResponse {
+    string message = 1;
+    string backup_full_path = 2;
+}
+
+// LOAD FROM PATH
+
+message LoadFromPathRequest {
+    string client_id = 1;
+    string path = 2;
+    string collection_name = 3;
+}
+
+message LoadFromPathResponse {
+    string message = 1;
+}
+
+// LOAD FROM GCS
+
+message LoadFromGcsRequest {
+    string client_id = 1;
+    string creds = 2;
+    string bucket = 3;
+    string path = 4;
+    string collection_name = 5;
+}
+
+message LoadFromGcsResponse {
+    string message = 1;
+}
+
+// COMMON
+
+// Schema object
+message CollectionSchema {
+    string field_name = 1;
+    string field_type = 2;
+    bool is_nullable = 3;
+}
+
+// Key & Embedding (string, float_list)
+message KeyedEmbedding {
+    string key = 1;            // The key associated with the embedding
+    repeated double embedding = 2;
+}
+
+// Key & KeyedValueList (string, list of KeyedFlexItem)
+message KeyedKeyedFlexList {
+    string key = 1;
+    repeated KeyedFlexItem items = 2;
+}
+
+// List of KeyedFlexItem
+message KeyedFlexItemList {
+    repeated KeyedFlexItem items = 1;
+}
+
+// Key & Value (string, FlexItem)
+message KeyedFlexItem {
+    string key = 1;
+    FlexItem value = 2;
+}
+
+// List of FlexItemList
+message FlexItemListList {
+    bool is_null = 1;
+    repeated FlexItemList items = 2;
+}
+
+// List of FlexItem
+message FlexItemList {
+    repeated FlexItem items = 1;
+}
+
+// Value object to handle various data types:
+// string, int, float, list of strings, list of ints, list of floats
+message FlexItem {
+    oneof value {
+        bool is_null = 1;
+        bool bool_value = 2;
+        NullableString str_value = 3;
+        int32 int_value = 4;
+        double float_value = 5;
+        StrListValue str_list_value = 6;
+        IntListValue int_list_value = 7;
+        FloatListValue float_list_value = 8;
+    }
+}
+
+message NullableString {
+    oneof value {
+        bool is_null = 1;
+        string str_value = 2;
+    }
+}
+
+message StrListValue {
+    repeated NullableString values = 1;  // A list of strings, allowing none/null
+}
+
+message IntListValue {
+    repeated int32 values = 1;   // A list of integers
+}
+
+message FloatListValue {
+    repeated double values = 1;   // A list of floats
+}

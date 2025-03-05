@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-yaml
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
+      - id: end-of-file-fixer
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
+      - id: trailing-whitespace
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
+
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        require_serial: true
+        language: python
+        language_version: python3
+        types_or: [cython, pyi, python]
+        args: ["--filter-files", --top=setuppath]
+        minimum_pre_commit_version: "2.9.2"
+        additional_dependencies: ["isort==5.10.1"]
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
+
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.5.7
+    hooks:
+      - id: autopep8
+        args: ['--max-line-length=120', '--ignore=E731', '--in-place']
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        args: [--ignore=E501 E203 E266 E712 W291 E722 W503 E731]
+        exclude: "^(mellow_db/protocols/service_pb2(_grpc)?\\.py)$"
